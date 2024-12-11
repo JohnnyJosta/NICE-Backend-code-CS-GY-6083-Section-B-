@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.StateroomMapper">
+
+    <!-- ResultMap for Stateroom -->
+    <resultMap id="StateroomResultMap" type="jtw.nice.entity.Stateroom">
+        <id property="roomId" column="room_id" jdbcType="INTEGER"/>
+        <result property="roomType" column="room_type" jdbcType="VARCHAR"/>
+        <result property="roomSize" column="room_size" jdbcType="DECIMAL"/>
+        <result property="bedNumber" column="bed_number" jdbcType="INTEGER"/>
+        <result property="bathroomNumber" column="bathroom_number" jdbcType="DECIMAL"/>
+        <result property="balconyNumber" column="balcony_number" jdbcType="INTEGER"/>
+        <result property="price" column="price" jdbcType="DECIMAL"/>
+        <result property="location" column="location" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="addStateroom" useGeneratedKeys="true" keyProperty="roomId" keyColumn="room_id">
+        INSERT INTO jtw_stateroom
+        (room_type, room_size, bed_number, bathroom_number, balcony_number, price, location)
+        VALUES
+            (#{roomType}, #{roomSize}, #{bedNumber}, #{bathroomNumber}, #{balconyNumber}, #{price}, #{location})
+    </insert>
+
+    <update id="updateStateroom">
+        UPDATE jtw_stateroom
+        <set>
+            <if test="room.roomType != null">room_type = #{room.roomType},</if>
+            <if test="room.roomSize != null">room_size = #{room.roomSize},</if>
+            <if test="room.bedNumber != null">bed_number = #{room.bedNumber},</if>
+            <if test="room.bathroomNumber != null">bathroom_number = #{room.bathroomNumber},</if>
+            <if test="room.balconyNumber != null">balcony_number = #{room.balconyNumber},</if>
+            <if test="room.price != null">price = #{room.price},</if>
+            <if test="room.location != null">location = #{room.location},</if>
+        </set>
+        WHERE room_id = #{id}
+    </update>
+
+    <delete id="deleteStateroom">
+        DELETE FROM jtw_stateroom
+        WHERE room_id = #{roomId}
+    </delete>
+
+    <select id="getStateroomById" resultMap="StateroomResultMap">
+        SELECT *
+        FROM jtw_stateroom
+        WHERE room_id = #{roomId}
+    </select>
+
+    <select id="getAllStaterooms" resultMap="StateroomResultMap">
+        SELECT *
+        FROM jtw_stateroom
+        ORDER BY room_type ASC
+    </select>
+
+    <!-- 查询房间统计信息 -->
+    <select id="getRoomStatisticsByTripId" resultType="map">
+        SELECT
+            room_type AS roomType,
+            location,
+            remaining_units AS remainingUnits,
+            price
+        FROM
+            jtw_room_statistics
+        WHERE
+            trip_id = #{tripId}
+        ORDER BY
+            room_type ASC, price ASC
+    </select>
+
+    <!-- Get all room_ids for a specific room type and location. -->
+    <select id="getAvailableRoomIds" resultType="integer">
+        SELECT room_id
+        FROM jtw_stateroom
+        WHERE room_type = #{roomType}
+          AND location = #{location}
+    </select>
+</mapper>

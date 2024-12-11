@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.InvoiceMapper">
+
+    <!-- Result Map for Invoice -->
+    <resultMap id="InvoiceResultMap" type="jtw.nice.entity.Invoice">
+        <id property="invoiceId" column="invoice_id" jdbcType="INTEGER"/>
+        <result property="chargeDate" column="charge_date" jdbcType="DATE"/>
+        <result property="chargeAmount" column="charge_amount" jdbcType="DECIMAL"/>
+        <result property="remainingAmount" column="remaining_amount" jdbcType="DECIMAL"/>
+        <result property="tripId" column="trip_id" jdbcType="INTEGER"/>
+        <result property="groupId" column="group_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- Insert a new Invoice -->
+    <insert id="addInvoice" useGeneratedKeys="true" keyProperty="invoiceId" keyColumn="invoice_id">
+        INSERT INTO jtw_invoice (charge_date, charge_amount, remaining_amount, trip_id, group_id)
+        VALUES (#{chargeDate}, #{chargeAmount}, #{remainingAmount}, #{tripId}, #{groupId})
+    </insert>
+
+    <!-- Update an existing Invoice -->
+    <update id="updateInvoice">
+        UPDATE jtw_invoice
+        <set>
+            <if test="invoice.chargeDate != null">charge_date = #{invoice.chargeDate},</if>
+            <if test="invoice.chargeAmount != null">charge_amount = #{invoice.chargeAmount},</if>
+            <if test="invoice.remainingAmount != null">remaining_amount = #{invoice.remainingAmount},</if>
+            <if test="invoice.tripId != null">trip_id = #{invoice.tripId},</if>
+            <if test="invoice.groupId != null">group_id = #{invoice.groupId},</if>
+        </set>
+        WHERE invoice_id = #{invoiceId}
+    </update>
+
+    <!-- Delete an Invoice by ID -->
+    <delete id="deleteInvoice">
+        DELETE FROM jtw_invoice WHERE invoice_id = #{invoiceId}
+    </delete>
+
+    <!-- Get an Invoice by ID -->
+    <select id="getInvoiceById" resultMap="InvoiceResultMap">
+        SELECT * FROM jtw_invoice WHERE invoice_id = #{invoiceId}
+    </select>
+
+    <!-- Get all Invoices -->
+    <select id="getAllInvoices" resultMap="InvoiceResultMap">
+        SELECT * FROM jtw_invoice ORDER BY charge_date ASC
+    </select>
+
+    <select id="getInvoicesByGroupId" resultType="map">
+        SELECT
+            i.invoice_id AS id,
+            i.charge_date AS date,
+            sp.port_name AS origin,
+            ep.port_name AS destination,
+            i.charge_amount AS totalPrice,
+            i.remaining_amount AS remainingPrice
+        FROM
+            jtw_invoice i
+            JOIN
+            jtw_trip t ON i.trip_id = t.trip_id
+            JOIN
+            jtw_port sp ON t.start_port_id = sp.port_id
+            JOIN
+            jtw_port ep ON t.end_port_id = ep.port_id
+        WHERE
+            i.group_id = #{groupId}
+        ORDER BY
+            i.charge_date DESC
+    </select>
+
+    <update id="updateRemainingAmount">
+        UPDATE jtw_invoice
+        SET
+            remaining_amount = remaining_amount - #{paymentAmount}
+        WHERE
+            trip_id = #{tripId} AND group_id = #{groupId} AND remaining_amount >= #{paymentAmount}
+    </update>
+
+    <select id="getInvoiceIdByTripAndGroupId" resultType="int">
+        SELECT invoice_id
+        FROM jtw_invoice
+        WHERE trip_id = #{tripId} AND group_id = #{groupId}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.PackageChargeMapper">
+
+    <!-- Result Map for PackageCharge -->
+    <resultMap id="PackageChargeResultMap" type="jtw.nice.entity.PackageCharge">
+        <id property="packageChargeId" column="package_charge_id" jdbcType="INTEGER"/>
+        <result property="chargeDate" column="charge_date" jdbcType="DATE"/>
+        <result property="packageId" column="package_id" jdbcType="INTEGER"/>
+        <result property="tripId" column="trip_id" jdbcType="INTEGER"/>
+        <result property="groupId" column="group_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- Insert a new PackageCharge -->
+    <insert id="addPackageCharge" useGeneratedKeys="true" keyProperty="packageChargeId" keyColumn="package_charge_id">
+        INSERT INTO jtw_package_charge (charge_date, package_id, trip_id, group_id)
+        VALUES (#{chargeDate}, #{packageId}, #{tripId}, #{groupId})
+    </insert>
+
+    <!-- Update an existing PackageCharge -->
+    <update id="updatePackageCharge">
+        UPDATE jtw_package_charge
+        <set>
+            <if test="packageCharge.chargeDate != null">charge_date = #{packageCharge.chargeDate},</if>
+            <if test="packageCharge.packageId != null">package_id = #{packageCharge.packageId},</if>
+            <if test="packageCharge.tripId != null">trip_id = #{packageCharge.tripId},</if>
+            <if test="packageCharge.groupId != null">group_id = #{packageCharge.groupId},</if>
+        </set>
+        WHERE package_charge_id = #{packageChargeId}
+    </update>
+
+    <!-- Delete a PackageCharge by ID -->
+    <delete id="deletePackageCharge">
+        DELETE FROM jtw_package_charge WHERE package_charge_id = #{packageChargeId}
+    </delete>
+
+    <!-- Get a PackageCharge by ID -->
+    <select id="getPackageChargeById" resultMap="PackageChargeResultMap">
+        SELECT * FROM jtw_package_charge WHERE package_charge_id = #{packageChargeId}
+    </select>
+
+    <!-- Get all PackageCharges -->
+    <select id="getAllPackageCharges" resultMap="PackageChargeResultMap">
+        SELECT * FROM jtw_package_charge ORDER BY charge_date ASC
+    </select>
+
+    <select id="getPackageChargesByTripAndGroupId" resultType="map">
+        SELECT
+            pc.charge_date AS time,
+            'Package Charge' AS type,
+            p.package_name AS name,
+            p.price_per_person AS price,
+            pc.package_charge_id AS id
+        FROM
+            jtw_package_charge pc
+            JOIN
+            jtw_package p ON pc.package_id = p.package_id
+        WHERE
+            pc.trip_id = #{tripId} AND pc.group_id = #{groupId}
+    </select>
+
+    <select id="getPackageChargesByTripAndGroup" resultType="map">
+        SELECT
+            pc.package_charge_id AS packageChargeId,
+            pc.package_id AS packageId,
+            pc.charge_date AS chargeDate
+        FROM
+            jtw_package_charge pc
+        WHERE
+            pc.trip_id = #{tripId} AND pc.group_id = #{groupId}
+    </select>
+</mapper>

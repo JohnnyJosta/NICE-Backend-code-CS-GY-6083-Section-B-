@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.PortMapper">
+
+    <resultMap id="PortResultMap" type="jtw.nice.entity.Port">
+        <id property="portId" column="port_id" jdbcType="INTEGER"/>
+        <result property="portName" column="port_name" jdbcType="VARCHAR"/>
+        <result property="portState" column="port_state" jdbcType="VARCHAR"/>
+        <result property="portNation" column="port_nation" jdbcType="VARCHAR"/>
+        <result property="portAddress" column="port_address" jdbcType="VARCHAR"/>
+        <result property="nearestAirport" column="nearest_airport" jdbcType="VARCHAR"/>
+        <result property="parkingSpot" column="parking_spot" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <insert id="addPort" useGeneratedKeys="true" keyProperty="portId" keyColumn="port_id">
+        INSERT INTO jtw_port
+        (port_name, port_state, port_nation, port_address, nearest_airport, parking_spot)
+        VALUES
+            (#{portName}, #{portState}, #{portNation}, #{portAddress}, #{nearestAirport}, #{parkingSpot})
+    </insert>
+
+    <update id="updatePort">
+        UPDATE jtw_port
+        <set>
+            <if test="port.portName != null">port_name = #{port.portName},</if>
+            <if test="port.portState != null">port_state = #{port.portState},</if>
+            <if test="port.portNation != null">port_nation = #{port.portNation},</if>
+            <if test="port.portAddress != null">port_address = #{port.portAddress},</if>
+            <if test="port.nearestAirport != null">nearest_airport = #{port.nearestAirport},</if>
+            <if test="port.parkingSpot != null">parking_spot = #{port.parkingSpot},</if>
+        </set>
+        WHERE port_id = #{id}
+    </update>
+
+    <delete id="deletePort">
+        DELETE FROM jtw_port
+        WHERE port_id = #{portId}
+    </delete>
+
+    <select id="getPortById" resultMap="PortResultMap">
+        SELECT *
+        FROM jtw_port
+        WHERE port_id = #{portId}
+    </select>
+
+    <select id="getAllPorts" resultMap="PortResultMap">
+        SELECT *
+        FROM jtw_port
+        ORDER BY port_id ASC
+    </select>
+
+</mapper>

@@ -1,0 +1,43 @@
+server:
+  port: 3300
+spring:
+  application:
+    name: nice
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/nice6
+    username: root
+    password: root
+  web:
+    resources:
+      add-mappings: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+springdoc:
+  api-docs:
+    path: v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+jwt:
+  secret: sZXzdFvNVhgHoW053BHzsR9cAsPWUqKNTdykxhQ9k5Y=
+  expiration: 14400
+  refreshTime: 14400

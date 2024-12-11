@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.RestaurantMapper">
+
+    <resultMap id="RestaurantResultMap" type="jtw.nice.entity.Restaurant">
+        <id property="restaurantId" column="restaurant_id" jdbcType="INTEGER"/>
+        <result property="restaurantName" column="restaurant_name" jdbcType="VARCHAR"/>
+        <result property="mealService" column="meal_service" jdbcType="VARCHAR"/>
+        <result property="startTime" column="start_time" jdbcType="TIME"/>
+        <result property="endTime" column="end_time" jdbcType="TIME"/>
+        <result property="floor" column="floor" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="addRestaurant" useGeneratedKeys="true" keyProperty="restaurantId" keyColumn="restaurant_id">
+        INSERT INTO jtw_restaurant
+            (restaurant_name, meal_service, start_time, end_time, floor)
+        VALUES
+            (#{restaurantName}, #{mealService}, #{startTime}, #{endTime}, #{floor})
+    </insert>
+
+    <update id="updateRestaurant">
+        UPDATE jtw_restaurant
+        <set>
+            <if test="restaurant.restaurantName != null">restaurant_name = #{restaurant.restaurantName},</if>
+            <if test="restaurant.mealService != null">meal_service = #{restaurant.mealService},</if>
+            <if test="restaurant.startTime != null">start_time = #{restaurant.startTime},</if>
+            <if test="restaurant.endTime != null">end_time = #{restaurant.endTime},</if>
+            <if test="restaurant.floor != null">floor = #{restaurant.floor},</if>
+        </set>
+        WHERE restaurant_id = #{id}
+    </update>
+
+    <delete id="deleteRestaurant">
+        DELETE FROM jtw_restaurant
+        WHERE restaurant_id = #{restaurantId}
+    </delete>
+
+    <select id="getRestaurantById" resultMap="RestaurantResultMap">
+        SELECT *
+        FROM jtw_restaurant
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <select id="getAllRestaurants" resultMap="RestaurantResultMap">
+        SELECT *
+        FROM jtw_restaurant
+        ORDER BY restaurant_name ASC
+    </select>
+</mapper>

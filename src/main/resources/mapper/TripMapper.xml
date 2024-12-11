@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.TripMapper">
+
+    <resultMap id="TripResultMap" type="jtw.nice.entity.Trip">
+        <id property="tripId" column="trip_id" jdbcType="INTEGER"/>
+        <result property="startDateTime" column="start_date_time" jdbcType="TIMESTAMP"/>
+        <result property="endDateTime" column="end_date_time" jdbcType="TIMESTAMP"/>
+        <result property="totalNight" column="total_night" jdbcType="INTEGER"/>
+        <result property="startPortId" column="start_port_id" jdbcType="INTEGER"/>
+        <result property="endPortId" column="end_port_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <resultMap id="StopoverResultMap" type="jtw.nice.entity.Stopover">
+        <id property="stopoverId" column="stopover_id" jdbcType="INTEGER"/>
+        <result property="tripId" column="trip_id" jdbcType="INTEGER"/>
+        <result property="portId" column="port_id" jdbcType="INTEGER"/>
+        <result property="arrivalTime" column="arrival_time" jdbcType="TIMESTAMP"/>
+        <result property="departureTime" column="departure_time" jdbcType="TIMESTAMP"/>
+        <result property="notes" column="notes" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="addTrip" useGeneratedKeys="true" keyProperty="tripId" keyColumn="trip_id">
+        INSERT INTO jtw_trip
+        (start_date_time, end_date_time, total_night, start_port_id, end_port_id)
+        VALUES
+            (#{startDateTime}, #{endDateTime}, #{totalNight}, #{startPortId}, #{endPortId})
+    </insert>
+
+    <update id="updateTrip">
+        UPDATE jtw_trip
+        <set>
+            <if test="trip.startDateTime != null">start_date_time = #{trip.startDateTime},</if>
+            <if test="trip.endDateTime != null">end_date_time = #{trip.endDateTime},</if>
+            <if test="trip.totalNight != null">total_night = #{trip.totalNight},</if>
+            <if test="trip.startPortId != null">start_port_id = #{trip.startPortId},</if>
+            <if test="trip.endPortId != null">end_port_id = #{trip.endPortId},</if>
+        </set>
+        WHERE trip_id = #{id}
+    </update>
+
+    <delete id="deleteTrip">
+        DELETE FROM jtw_trip
+        WHERE trip_id = #{tripId}
+    </delete>
+
+    <select id="getTripById" resultMap="TripResultMap">
+        SELECT *
+        FROM jtw_trip
+        WHERE trip_id = #{tripId}
+    </select>
+
+    <select id="getAllTrips" resultMap="TripResultMap">
+        SELECT *
+        FROM jtw_trip
+        ORDER BY start_date_time ASC
+    </select>
+
+    <!-- Add Stopover -->
+    <insert id="addStopover" useGeneratedKeys="true" keyProperty="stopoverId" keyColumn="stopover_id">
+        INSERT INTO jtw_stopover (trip_id, port_id, arrival_time, departure_time, notes)
+        VALUES (#{tripId}, #{portId}, #{arrivalTime}, #{departureTime}, #{notes})
+    </insert>
+
+    <update id="updateStopover">
+        UPDATE jtw_stopover
+        <set>
+            <if test="stopover.portId != null">port_id = #{stopover.portId},</if>
+            <if test="stopover.arrivalTime != null">arrival_time = #{stopover.arrivalTime},</if>
+            <if test="stopover.departureTime != null">departure_time = #{stopover.departureTime},</if>
+            <if test="stopover.notes != null">notes = #{stopover.notes},</if>
+        </set>
+        WHERE stopover_id = #{id}
+    </update>
+
+    <!-- 获取指定 trip 的所有 stopover -->
+    <select id="getStopoversByTripId" resultMap="StopoverResultMap">
+        SELECT *
+        FROM jtw_stopover
+        WHERE trip_id = #{tripId}
+    </select>
+
+    <!-- 删除 trip 下的所有 stopover -->
+    <delete id="deleteStopoversByTripId">
+        DELETE FROM jtw_stopover
+        WHERE trip_id = #{tripId}
+    </delete>
+
+    <!-- 查询 Trip 的基本信息 -->
+    <select id="getTripBasicDetails" resultType="map">
+        SELECT
+            t.trip_id AS id,
+            sp.port_name AS origin,
+            ep.port_name AS destination,
+            TIMESTAMPDIFF(DAY, t.start_date_time, t.end_date_time) AS duration,
+            1200 AS price, -- 此处为示例价格，实际可能从表中获取
+            DATE(t.start_date_time) AS departureDate
+        FROM
+            jtw_trip t
+            INNER JOIN
+            jtw_port sp ON t.start_port_id = sp.port_id
+            INNER JOIN
+            jtw_port ep ON t.end_port_id = ep.port_id
+        WHERE
+            t.trip_id = #{tripId}
+    </select>
+
+    <select id="getAllTripsBasicDetails" resultType="map">
+        SELECT
+            t.trip_id AS id,
+            sp.port_name AS origin,
+            ep.port_name AS destination,
+            TIMESTAMPDIFF(DAY, t.start_date_time, t.end_date_time) AS duration,
+            DATE(t.start_date_time) AS departureDate
+        FROM
+            jtw_trip t
+            INNER JOIN jtw_port sp ON t.start_port_id = sp.port_id
+            INNER JOIN jtw_port ep ON t.end_port_id = ep.port_id
+    </select>
+
+
+    <!-- 查询 Trip 的经停站 -->
+    <select id="getTripStops" resultType="map">
+        SELECT
+            p.port_name AS portName,
+            s.arrival_time AS arrivalTime,
+            s.departure_time AS departureTime
+        FROM
+            jtw_stopover s
+                INNER JOIN
+            jtw_port p ON s.port_id = p.port_id
+        WHERE
+            s.trip_id = #{tripId}
+        ORDER BY
+            s.arrival_time ASC
+    </select>
+
+    <!-- 查询 Trip 的餐厅 -->
+    <select id="getTripRestaurants" resultType="map">
+        SELECT
+            r.restaurant_name AS name,
+            r.meal_service AS type,
+            CONCAT(TIME(r.start_time), ' to ', TIME(r.end_time)) AS serveTime,
+            r.floor AS location
+        FROM
+            jtw_trip_restaurant tr
+                INNER JOIN
+            jtw_restaurant r ON tr.restaurant_id = r.restaurant_id
+        WHERE
+            tr.trip_id = #{tripId}
+    </select>
+
+    <!-- 查询 Trip 的娱乐设施 -->
+    <select id="getTripEntertainments" resultType="map">
+        SELECT
+            e.entertainment_name AS name,
+            e.floor AS location,
+            te.quantity AS quantity
+        FROM
+            jtw_trip_entertainment te
+                INNER JOIN
+            jtw_entertainment e ON te.entertainment_id = e.entertainment_id
+        WHERE
+            te.trip_id = #{tripId}
+    </select>
+
+    <!-- 查询 Trip 的套餐 -->
+    <select id="getTripPackages" resultType="map">
+        SELECT
+            p.package_name AS name,
+            p.price_per_person AS price,
+            p.charge_period AS chargeMethod
+        FROM
+            jtw_package p
+    </select>
+
+</mapper>

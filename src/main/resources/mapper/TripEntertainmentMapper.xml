@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.TripEntertainmentMapper">
+
+    <!-- Insert a new TripEntertainment -->
+    <insert id="addTripEntertainment">
+        INSERT INTO jtw_trip_entertainment (trip_id, entertainment_id, quantity)
+        VALUES (#{tripId}, #{entertainmentId}, #{quantity})
+    </insert>
+
+    <!-- Update an existing TripEntertainment -->
+    <update id="updateTripEntertainment">
+        UPDATE jtw_trip_entertainment
+        SET quantity = #{quantity}
+        WHERE trip_id = #{tripId} AND entertainment_id = #{entertainmentId}
+    </update>
+
+    <!-- Delete a TripEntertainment -->
+    <delete id="deleteTripEntertainment">
+        DELETE FROM jtw_trip_entertainment
+        WHERE trip_id = #{tripId} AND entertainment_id = #{entertainmentId}
+    </delete>
+
+    <!-- Get all entertainments for a trip -->
+    <select id="getTripEntertainmentsByTripId" resultType="jtw.nice.entity.TripEntertainment">
+        SELECT * FROM jtw_trip_entertainment WHERE trip_id = #{tripId}
+    </select>
+</mapper>

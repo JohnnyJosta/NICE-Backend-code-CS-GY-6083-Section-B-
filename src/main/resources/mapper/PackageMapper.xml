@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.PackageMapper">
+
+    <resultMap id="PackageResultMap" type="jtw.nice.entity.Package">
+        <id property="packageId" column="package_id" jdbcType="INTEGER"/>
+        <result property="packageName" column="package_name" jdbcType="VARCHAR"/>
+        <result property="pricePerPerson" column="price_per_person" jdbcType="DECIMAL"/>
+        <result property="chargePeriod" column="charge_period" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="addPackage" useGeneratedKeys="true" keyProperty="packageId" keyColumn="package_id">
+        INSERT INTO jtw_package
+            (package_name, price_per_person, charge_period)
+        VALUES
+            (#{packageName}, #{pricePerPerson}, #{chargePeriod})
+    </insert>
+
+    <update id="updatePackage">
+        UPDATE jtw_package
+        <set>
+            <if test="pkg.packageName != null">package_name = #{pkg.packageName},</if>
+            <if test="pkg.pricePerPerson != null">price_per_person = #{pkg.pricePerPerson},</if>
+            <if test="pkg.chargePeriod != null">charge_period = #{pkg.chargePeriod},</if>
+        </set>
+        WHERE package_id = #{id}
+    </update>
+
+    <delete id="deletePackage">
+        DELETE FROM jtw_package
+        WHERE package_id = #{packageId}
+    </delete>
+
+    <select id="getPackageById" resultMap="PackageResultMap">
+        SELECT *
+        FROM jtw_package
+        WHERE package_id = #{packageId}
+    </select>
+
+    <select id="getAllPackages" resultMap="PackageResultMap">
+        SELECT *
+        FROM jtw_package
+        ORDER BY package_name ASC
+    </select>
+
+</mapper>

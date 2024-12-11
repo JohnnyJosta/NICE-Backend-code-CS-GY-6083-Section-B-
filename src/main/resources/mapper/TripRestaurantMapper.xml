@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.TripRestaurantMapper">
+
+    <!-- Insert a new TripRestaurant -->
+    <insert id="addTripRestaurant">
+        INSERT INTO jtw_trip_restaurant (trip_id, restaurant_id, quantity)
+        VALUES (#{tripId}, #{restaurantId}, #{quantity})
+    </insert>
+
+    <!-- Update an existing TripRestaurant -->
+    <update id="updateTripRestaurant">
+        UPDATE jtw_trip_restaurant
+        SET quantity = #{quantity}
+        WHERE trip_id = #{tripId} AND restaurant_id = #{restaurantId}
+    </update>
+
+    <!-- Delete a TripRestaurant -->
+    <delete id="deleteTripRestaurant">
+        DELETE FROM jtw_trip_restaurant
+        WHERE trip_id = #{tripId} AND restaurant_id = #{restaurantId}
+    </delete>
+
+    <!-- Get all restaurants for a trip -->
+    <select id="getTripRestaurantsByTripId" resultType="jtw.nice.entity.TripRestaurant">
+        SELECT * FROM jtw_trip_restaurant WHERE trip_id = #{tripId}
+    </select>
+</mapper>

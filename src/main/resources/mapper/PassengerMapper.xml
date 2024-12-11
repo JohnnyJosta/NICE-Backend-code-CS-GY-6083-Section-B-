@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.PassengerMapper">
+
+    <resultMap id="PassengerResultMap" type="jtw.nice.entity.Passenger">
+        <id property="passengerId" column="passenger_id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="dateOfBirth" column="date_of_birth" jdbcType="DATE"/>
+        <result property="gender" column="gender" jdbcType="VARCHAR"/>
+        <result property="phoneNumber" column="phone_number" jdbcType="VARCHAR"/>
+        <result property="nationality" column="nationality" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="addrNation" column="addr_nation" jdbcType="VARCHAR"/>
+        <result property="addrState" column="addr_state" jdbcType="VARCHAR"/>
+        <result property="addrCity" column="addr_city" jdbcType="VARCHAR"/>
+        <result property="addrStreet" column="addr_street" jdbcType="VARCHAR"/>
+        <result property="addrZipcode" column="addr_zipcode" jdbcType="VARCHAR"/>
+        <result property="groupId" column="group_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <resultMap id="GroupMemberResultMap" type="jtw.nice.entity.dto.GroupMemberDTO">
+        <id property="id" column="passenger_id" />
+        <result property="name" column="name" />
+        <result property="birthDate" column="date_of_birth" />
+        <result property="phone" column="phone_number" />
+        <result property="email" column="email" />
+        <result property="gender" column="gender" />
+        <result property="address" column="address" />
+    </resultMap>
+
+    <insert id="addPassenger" useGeneratedKeys="true" keyProperty="passengerId" keyColumn="passenger_id">
+        INSERT INTO jtw_passenger
+        (name, date_of_birth, gender, phone_number, nationality, email,
+         addr_nation, addr_state, addr_city, addr_street, addr_zipcode, group_id)
+        VALUES
+            (#{name}, #{dateOfBirth}, #{gender}, #{phoneNumber}, #{nationality}, #{email},
+             #{addrNation}, #{addrState}, #{addrCity}, #{addrStreet}, #{addrZipcode}, #{groupId})
+    </insert>
+
+    <update id="updatePassenger">
+        UPDATE jtw_passenger
+        <set>
+            <if test="passenger.name != null">name = #{passenger.name},</if>
+            <if test="passenger.dateOfBirth != null">date_of_birth = #{passenger.dateOfBirth},</if>
+            <if test="passenger.gender != null">gender = #{passenger.gender},</if>
+            <if test="passenger.phoneNumber != null">phone_number = #{passenger.phoneNumber},</if>
+            <if test="passenger.nationality != null">nationality = #{passenger.nationality},</if>
+            <if test="passenger.email != null">email = #{passenger.email},</if>
+            <if test="passenger.addrNation != null">addr_nation = #{passenger.addrNation},</if>
+            <if test="passenger.addrState != null">addr_state = #{passenger.addrState},</if>
+            <if test="passenger.addrCity != null">addr_city = #{passenger.addrCity},</if>
+            <if test="passenger.addrStreet != null">addr_street = #{passenger.addrStreet},</if>
+            <if test="passenger.addrZipcode != null">addr_zipcode = #{passenger.addrZipcode},</if>
+            <if test="passenger.groupId != null">group_id = #{passenger.groupId},</if>
+        </set>
+        WHERE passenger_id = #{id}
+    </update>
+
+    <delete id="deletePassenger">
+        DELETE FROM jtw_passenger
+        WHERE passenger_id = #{passengerId}
+    </delete>
+
+    <select id="getPassengerById" resultMap="PassengerResultMap">
+        SELECT *
+        FROM jtw_passenger
+        WHERE passenger_id = #{passengerId}
+    </select>
+
+    <select id="getAllPassengers" resultMap="PassengerResultMap">
+        SELECT *
+        FROM jtw_passenger
+        ORDER BY name ASC
+    </select>
+
+    <!-- 根据 group_id 查询乘客列表 -->
+    <select id="getPassengersByGroupId" resultMap="GroupMemberResultMap">
+        SELECT
+            passenger_id,
+            name,
+            date_of_birth,
+            phone_number,
+            email,
+            gender,
+            CONCAT(addr_street, ', ', addr_city, ', ', addr_state, ', ', addr_zipcode) AS address
+        FROM
+            jtw_passenger
+        WHERE
+            group_id = #{groupId}
+    </select>
+
+    <update id="removePassengerFromGroup">
+        UPDATE jtw_passenger
+        SET group_id = 0
+        WHERE passenger_id = #{passengerId}
+    </update>
+
+</mapper>

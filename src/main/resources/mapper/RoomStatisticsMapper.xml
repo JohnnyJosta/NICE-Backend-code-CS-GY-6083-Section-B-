@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.RoomStatisticsMapper">
+
+    <!-- ResultMap for RoomStatistics -->
+    <resultMap id="RoomStatisticsResultMap" type="jtw.nice.entity.RoomStatistics">
+        <id property="statId" column="stat_id" jdbcType="INTEGER"/>
+        <result property="roomType" column="room_type" jdbcType="VARCHAR"/>
+        <result property="location" column="location" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="DECIMAL"/>
+        <result property="remainingUnits" column="remaining_units" jdbcType="INTEGER"/>
+        <result property="tripId" column="trip_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- Insert a new RoomStatistics -->
+    <insert id="addRoomStatistics" useGeneratedKeys="true" keyProperty="statId" keyColumn="stat_id">
+        INSERT INTO jtw_room_statistics (room_type, location, price, remaining_units, trip_id)
+        VALUES (#{roomType}, #{location}, #{price}, #{remainingUnits}, #{tripId})
+    </insert>
+
+    <!-- Update an existing RoomStatistics -->
+    <update id="updateRoomStatistics">
+        UPDATE jtw_room_statistics
+        <set>
+            <if test="roomType != null">room_type = #{roomType},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="remainingUnits != null">remaining_units = #{remainingUnits},</if>
+            <if test="tripId != null">trip_id = #{tripId},</if>
+        </set>
+        WHERE stat_id = #{statId}
+    </update>
+
+    <!-- Delete a RoomStatistics record -->
+    <delete id="deleteRoomStatistics">
+        DELETE FROM jtw_room_statistics WHERE stat_id = #{statId}
+    </delete>
+
+    <!-- Get RoomStatistics by ID -->
+    <select id="getRoomStatisticsById" resultMap="RoomStatisticsResultMap">
+        SELECT * FROM jtw_room_statistics WHERE stat_id = #{statId}
+    </select>
+
+    <!-- Get all RoomStatistics -->
+    <select id="getAllRoomStatistics" resultMap="RoomStatisticsResultMap">
+        SELECT * FROM jtw_room_statistics ORDER BY room_type ASC, location ASC
+    </select>
+
+    <!-- Reduce remaining units -->
+    <update id="reduceRoomUnits">
+        UPDATE jtw_room_statistics
+        SET remaining_units = remaining_units - #{quantity}
+        WHERE trip_id = #{tripId} AND room_type = #{roomType} AND location = #{location} AND remaining_units >= #{quantity}
+    </update>
+</mapper>

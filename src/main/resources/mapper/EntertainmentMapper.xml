@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jtw.nice.mapper.EntertainmentMapper">
+
+    <resultMap id="EntertainmentResultMap" type="jtw.nice.entity.Entertainment">
+        <id property="entertainmentId" column="entertainment_id" jdbcType="INTEGER"/>
+        <result property="entertainmentName" column="entertainment_name" jdbcType="VARCHAR"/>
+        <result property="numberOfUnit" column="number_of_unit" jdbcType="INTEGER"/>
+        <result property="floor" column="floor" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="addEntertainment" useGeneratedKeys="true" keyProperty="entertainmentId" keyColumn="entertainment_id">
+        INSERT INTO jtw_entertainment
+            (entertainment_name, number_of_unit, floor)
+        VALUES
+            (#{entertainmentName}, #{numberOfUnit}, #{floor})
+    </insert>
+
+    <update id="updateEntertainment">
+        UPDATE jtw_entertainment
+        <set>
+            <if test="entertainment.entertainmentName != null">entertainment_name = #{entertainment.entertainmentName},</if>
+            <if test="entertainment.numberOfUnit != null">number_of_unit = #{entertainment.numberOfUnit},</if>
+            <if test="entertainment.floor != null">floor = #{entertainment.floor},</if>
+        </set>
+        WHERE entertainment_id = #{id}
+    </update>
+
+    <delete id="deleteEntertainment">
+        DELETE FROM jtw_entertainment
+        WHERE entertainment_id = #{entertainmentId}
+    </delete>
+
+    <select id="getEntertainmentById" resultMap="EntertainmentResultMap">
+        SELECT *
+        FROM jtw_entertainment
+        WHERE entertainment_id = #{entertainmentId}
+    </select>
+
+    <select id="getAllEntertainments" resultMap="EntertainmentResultMap">
+        SELECT *
+        FROM jtw_entertainment
+        ORDER BY entertainment_name ASC
+    </select>
+
+</mapper>
